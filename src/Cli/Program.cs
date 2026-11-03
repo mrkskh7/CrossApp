@@ -1,51 +1,40 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using Core;
 
-// Коректне відображення кирилиці
 Console.OutputEncoding = Encoding.UTF8;
 
-// Перевірка наявності прапорця для додаткового завдання
+EnvironmentReport report = EnvironmentInfo.Collect();
 bool jsonMode = args.Contains("--json");
 
 if (jsonMode)
 {
-    var info = new
+    var options = new JsonSerializerOptions
     {
-        Student = "Сах Маркіян, група ФЕІ-34",
-        OsDescription = RuntimeInformation.OSDescription,
-        OsEnvironment = Environment.OSVersion.ToString(),
-        Architecture = RuntimeInformation.ProcessArchitecture.ToString(),
-        DotNetVersion = Environment.Version.ToString(),
-        Runtime = RuntimeInformation.FrameworkDescription,
-        BaseDirectory = AppContext.BaseDirectory,
-        CurrentDirectory = Environment.CurrentDirectory,
-        Domain = "Предметна область: Бібліотека (Book, BookCopy, Reader, Loan)"
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = EnvironmentReportJsonContext.Default,
+        WriteIndented = false
     };
-
-    var options = new JsonSerializerOptions 
-    { 
-        WriteIndented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
-    
-    Console.WriteLine(JsonSerializer.Serialize(info, options));
+    string json = JsonSerializer.Serialize(report, options);
+    Console.WriteLine(json);
 }
 else
 {
-    Console.WriteLine("CrossApp - практикум з крос-платформного програмування");
-    Console.WriteLine("Студент: Сах Маркіян, група ФЕІ-34"); // Вкажіть вашу реальну групу
+    Console.WriteLine("CrossApp - інформація про середовище");
     Console.WriteLine(new string('-', 52));
-    Console.WriteLine($"ОС (OSDescription) : {RuntimeInformation.OSDescription}");
-    Console.WriteLine($"ОС (Environment)   : {Environment.OSVersion}");
-    Console.WriteLine($"Архітектура процесу: {RuntimeInformation.ProcessArchitecture}");
-    Console.WriteLine($"Версія .NET (CLR)  : {Environment.Version}");
-    Console.WriteLine($"Runtime            : {RuntimeInformation.FrameworkDescription}");
-    Console.WriteLine($"Каталог застосунку : {AppContext.BaseDirectory}");
-    Console.WriteLine($"Поточний каталог   : {Environment.CurrentDirectory}");
+    Console.WriteLine($"Студент            : {report.Student}");
+    Console.WriteLine($"OC (OSDescription) : {report.OsDescription}");
+    Console.WriteLine($"OC (Environment)   : {report.OsVersion}");
+    Console.WriteLine($"Архітектура        : {report.Architecture}");
+    Console.WriteLine($"Runtime            : {report.Runtime}");
+    Console.WriteLine($"RID (визначено)    : {report.DetectedRid}");
+    Console.WriteLine($"RID (від .NET)     : {report.ReportedRid}");
+    Console.WriteLine($"Каталог застосунку : {report.BaseDirectory}");
+    Console.WriteLine($"Поточний каталог   : {report.CurrentDirectory}");
+    Console.WriteLine($"Збірка             : {report.BuildNote}");
     Console.WriteLine(new string('-', 52));
-    Console.WriteLine("Предметна область: Бібліотека (Book, BookCopy, Reader, Loan)");
+    Console.WriteLine(report.Domain);
 }
