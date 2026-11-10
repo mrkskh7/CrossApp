@@ -69,3 +69,9 @@ dotnet run --project src/Cli -f net9.0
 cd publish/linux-x64
 wsl
 DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 ./Cli
+
+## Лабораторна робота 3: Формат вхідних даних
+- Роздільник колонок: крапка з комою (`;`)
+- Кодування файлів: UTF-8
+- Структура CSV: `id;isbn;title;year;[author]`
+- Підтримувані розширення: `.csv`, `.json`, а також змішані файли з префіксами рядків `B;...` та `R;...
