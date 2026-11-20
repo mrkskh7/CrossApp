@@ -76,11 +76,14 @@ DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 ./Cli
 - Структура CSV: `id;isbn;title;year;[author]`
 - Підтримувані розширення: `.csv`, `.json`, а також змішані файли з префіксами рядків `B;...` та `R;...
 
-## Лабораторна робота 4: Інваріанти доменної моделі (Бібліотека)
-- Ідентифікатор примірника та ISBN не можуть бути порожніми (`ArgumentException`).
-- Ідентифікатор видачі та ідентифікатор читача не можуть бути порожніми (`ArgumentException`).
-- Не можна видати вже виданий примірник книги (`InvalidOperationException`).
-- Не можна повернути примірник, який не було видано (`InvalidOperationException`).
-- Дата повернення книги не може бути раніше дати її видачі (`ArgumentOutOfRangeException`).
-- Не можна закрити вже закриту видачу (`InvalidOperationException`).
-- Один читач не може мати більше 5 одночасно відкритих видач (`InvalidOperationException`).
+## Лабораторна робота №4: Доменна модель (BookCopy + Loan)
+
+Реалізовані бізнес-інваріанти предметної області «Бібліотека»:
+1. **Непорожні ідентифікатори та ISBN (`ArgumentException`):** `Id` примірника, `ISBN`, `Id` видачі/броні та `ReaderId` не можуть бути порожніми або складатися лише з пробілів (`BookCopy.Create`, `Loan.Open`, `Loan.Reserve`).
+2. **Заборона повторної видачі (`InvalidOperationException`):** примірник книги, який уже виданий (`IsIssued == true`), не можна видати повторно (`BookCopy.Issue`).
+3. **Заборона повернення невиданого примірника (`InvalidOperationException`):** повернути на полицю можна лише той примірник, який перебуває на руках (`BookCopy.Return`).
+4. **Контроль бронювання примірника (`InvalidOperationException`):** не можна забронювати вже виданий або вже заброньований примірник (`BookCopy.Reserve`), а заброньований примірник не може напряму видати інший читач (`Loan.Open`).
+5. **Коректність терміну броні та дати повернення (`ArgumentOutOfRangeException`):** дата завершення броні `ReservedUntil` має бути пізніше дати оформлення, а дата повернення `ReturnedOn` не може бути раніше дати видачі `IssuedOn` (`Loan.Reserve`, `Loan.Close`).
+6. **Контроль актуальності броні (`InvalidOperationException`):** отримати книгу за бронню можна лише до завершення терміну `ReservedUntil` (`Loan.IssueFromReservation`).
+7. **Допустимі переходи станів (`InvalidOperationException`):** переходи між станами `Reserved`, `Open` та `Closed` контролюються `switch`-виразом; повторне закриття або активація закритої видачі заборонені (`Loan.EnsureTransition`).
+8. **Ліміт відкритих видач на читача (`InvalidOperationException`):** один читач не може мати більше 5 одночасно відкритих видач (`LoanLimitPolicy.OpenWithLimit`).
